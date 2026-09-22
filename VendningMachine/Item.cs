@@ -10,7 +10,7 @@ namespace VendningMachine.App
     {
         public static short ID { get; private set; }
         public float price;
-        public string itemName;
+        public string itemName = string.Empty;
         public int quantiy;
 
         internal Item(string name, float itemPrice, int itemQuantity)

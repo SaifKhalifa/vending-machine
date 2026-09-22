@@ -8,14 +8,15 @@ namespace VendningMachine.App
 {
     internal static class CoinSlot
     {
-        static readonly SortedSet<float> _acceptedMoney = new SortedSet<float> { 0.1, 0.2, 0.5, 1, 20, 50};
+        static readonly SortedSet<float> _acceptedMoney = new SortedSet<float> { 0.1f, 0.2f, 0.5f, 1f, 20f, 50f };
+
+        // exact "== 0" comparisom gave me a headache and a bunch of errors, so used epsillon to get around it.
+        const float Epsilon = 0.0001f;
 
         public static float ValidateMoney(float target, List<float> sumNumbers)
         {
             float maxTemp = _acceptedMoney.Max;
             float minTemp = _acceptedMoney.Min;
-
-            _acceptedMoney.Append(target);
 
             float targetValue = target;
 
@@ -25,7 +26,7 @@ namespace VendningMachine.App
             {
                 if (i < 0) break;
 
-                if (targetValue == 0)
+                if (targetValue < Epsilon)
                     break;
 
                 if (targetValue >= maxTemp)
@@ -35,9 +36,9 @@ namespace VendningMachine.App
 
                     continue;
                 }
-                else if (targetValue == minTemp)
+                else if (Math.Abs(targetValue - minTemp) < Epsilon)
                 {
-                    targetValue -= minTemp;
+                    targetValue = 0;
                     sumNumbers.Add(minTemp);
 
                     continue;
@@ -49,35 +50,43 @@ namespace VendningMachine.App
                     {
                         if (targetValue < maxTemp)
                         {
-                            if (j > 0)
+                            if (Math.Abs(targetValue - _acceptedMoney.ElementAt(j)) < Epsilon)
                             {
-                                if ((targetValue - _acceptedMoney.ElementAt(j)) == 0)
-                                {
-                                    targetValue -= _acceptedMoney.ElementAt(j);
-                                    sumNumbers.Add(_acceptedMoney.ElementAt(j));
+                                targetValue = 0;
+                                sumNumbers.Add(_acceptedMoney.ElementAt(j));
 
-                                    break;
-                                }
+                                break;
+                            }
 
-                                while ((targetValue - _acceptedMoney.ElementAt(j)) > 0)
-                                {
-                                    targetValue -= _acceptedMoney.ElementAt(j);
-                                    sumNumbers.Add(_acceptedMoney.ElementAt(j));
-                                }
+                            while (targetValue - _acceptedMoney.ElementAt(j) > Epsilon)
+                            {
+                                targetValue -= _acceptedMoney.ElementAt(j);
+                                sumNumbers.Add(_acceptedMoney.ElementAt(j));
                             }
                         }
 
-                        if (targetValue == 0)
+                        if (targetValue < Epsilon)
                             break;
                     }
 
-                    if (targetValue > 0)
+                    if (targetValue >= Epsilon)
                     {
                         return -1;
                     }
                 }
             }
-            return targetValue;
+            return targetValue < Epsilon ? 0 : targetValue;
+        }
+
+        public static bool IsAcceptedDenomination(float value)
+        {
+            foreach (float coin in _acceptedMoney)
+            {
+                if (Math.Abs(coin - value) < Epsilon)
+                    return true;
+            }
+
+            return false;
         }
     }
 }

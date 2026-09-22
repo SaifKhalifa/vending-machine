@@ -1,39 +1,43 @@
-﻿using System.Security.Cryptography.X509Certificates;
+using VendningMachine.App;
 
 namespace VendningMachine
 {
     internal class Program
     {
-        List<float> sumNumbers = new List<float>();
-        static Dictionary<float, int> frequencies = new Dictionary<float, int>();
-
-        public void CountFreq()
+        static void Main(string[] args)
         {
-            foreach (float value in sumNumbers)
+            string dataFile = Path.Combine(AppContext.BaseDirectory, "items.txt");
+            SnackMachine machine = new SnackMachine(dataFile);
+
+            Console.WriteLine("Welcome to the Snack Vending Machine!");
+
+            bool running = true;
+
+            while (running)
             {
-                if (frequencies.ContainsKey(value))
+                machine.ShowMenu();
+                Console.Write("Enter a slot number to buy (or 'exit' to quit): ");
+                string? input = Console.ReadLine();
+
+                if (input != null && input.ToLower() == "exit")
                 {
-                    frequencies[value] = frequencies[value] + 1;
+                    running = false;
+                    continue;
+                }
+
+                int slotNumber;
+
+                if (int.TryParse(input, out slotNumber))
+                {
+                    machine.Purchase(slotNumber);
                 }
                 else
                 {
-                    frequencies[value] = 1;
+                    Console.WriteLine("Please enter a valid number.");
                 }
             }
-        }
 
-        static void Main(string[] args)
-        {
-            //float value = 211.5f, temp;
-
-            //Console.WriteLine(ValidateMoney(value, numbers));
-
-            //Console.WriteLine("The value can be summed up by: ");
-
-            //foreach (var item in frequencies)
-            //{
-            //    Console.WriteLine($"x{item.Key} [{item.Value}]");
-            //}
+            Console.WriteLine("Goodbye!");
         }
     }
 }
